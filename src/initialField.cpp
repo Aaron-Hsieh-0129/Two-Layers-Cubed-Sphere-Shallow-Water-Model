@@ -4,76 +4,78 @@ void Init::Init2d(CSSWM & model) {
     for (int p = 0; p < 6; p++) {
         for (int j = 0; j < NY; j++) {
             for (int i = 0; i < NX; i++) {
-                #ifdef ConvergenceRate
-                    model.csswm[p].hp[i][j] = ConvergenceRateH(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]);
-                    model.csswm[p].up[i][j] = (model.gLower[i][j][0] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][2]) * SteadyGeostrophyU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
-                                              (model.gLower[i][j][0] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][3]) * SteadyGeostrophyV(model.csswm[p].lon[i][j]);
-                    model.csswm[p].vp[i][j] = (model.gLower[i][j][2] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][2]) * SteadyGeostrophyU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
-                                              (model.gLower[i][j][2] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][3]) * SteadyGeostrophyV(model.csswm[p].lon[i][j]);
-                #endif
+                for (int k = 0; k < NZ; k++) {
+                    #ifdef ConvergenceRate
+                        model.csswm[p].hp[i][j] = ConvergenceRateH(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]);
+                        model.csswm[p].up[i][j] = (model.gLower[i][j][0] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][2]) * SteadyGeostrophyU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
+                                                (model.gLower[i][j][0] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][3]) * SteadyGeostrophyV(model.csswm[p].lon[i][j]);
+                        model.csswm[p].vp[i][j] = (model.gLower[i][j][2] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][2]) * SteadyGeostrophyU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
+                                                (model.gLower[i][j][2] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][3]) * SteadyGeostrophyV(model.csswm[p].lon[i][j]);
+                    #endif
 
-                #if defined(Advection)
-                    model.csswm[p].hp[i][j] = AdvectionH(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]);
-                    model.csswm[p].up[i][j] = (model.gLower[i][j][0] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][2]) * AdvectionU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
-                                              (model.gLower[i][j][0] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][3]) * AdvectionV(model.csswm[p].lon[i][j]);
-                    model.csswm[p].vp[i][j] = (model.gLower[i][j][2] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][2]) * AdvectionU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
-                                              (model.gLower[i][j][2] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][3]) * AdvectionV(model.csswm[p].lon[i][j]);
-                #endif
+                    #if defined(Advection)
+                        model.csswm[p].hp[i][j] = AdvectionH(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]);
+                        model.csswm[p].up[i][j] = (model.gLower[i][j][0] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][2]) * AdvectionU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
+                                                (model.gLower[i][j][0] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][3]) * AdvectionV(model.csswm[p].lon[i][j]);
+                        model.csswm[p].vp[i][j] = (model.gLower[i][j][2] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][2]) * AdvectionU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
+                                                (model.gLower[i][j][2] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][3]) * AdvectionV(model.csswm[p].lon[i][j]);
+                    #endif
 
-                #if defined(Jung)
-                    model.csswm[p].hp[i][j] = JungH(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]);
-                    double mult[2][2];
-                    model.matrixMul(model.gLower[i][j], model.csswm[p].IA[i][j], mult);
-                    model.csswm[p].up[i][j] = mult[0][0] * JungU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
-                                              mult[0][1] * JungV(model.csswm[p].lon[i][j]);
+                    #if defined(Jung)
+                        model.csswm[p].hp[i][j] = JungH(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]);
+                        double mult[2][2];
+                        model.matrixMul(model.gLower[i][j], model.csswm[p].IA[i][j], mult);
+                        model.csswm[p].up[i][j] = mult[0][0] * JungU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
+                                                mult[0][1] * JungV(model.csswm[p].lon[i][j]);
 
-                    model.matrixMul(model.gLower[i][j], model.csswm[p].IA[i][j], mult);
-                    model.csswm[p].vp[i][j] = mult[1][0] * JungU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
-                                              mult[1][1] * JungV(model.csswm[p].lon[i][j]);
-                #endif
+                        model.matrixMul(model.gLower[i][j], model.csswm[p].IA[i][j], mult);
+                        model.csswm[p].vp[i][j] = mult[1][0] * JungU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
+                                                mult[1][1] * JungV(model.csswm[p].lon[i][j]);
+                    #endif
 
-                #ifdef DeformationalFlow
-                    model.csswm[p].hp[i][j] = DeformationalFlowH(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]);
-                #endif
+                    #ifdef DeformationalFlow
+                        model.csswm[p].hp[i][j] = DeformationalFlowH(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]);
+                    #endif
 
-                #ifdef GravityWave
-                    model.csswm[p].hp[i][j] = Gravity(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]);
-                    model.csswm[p].up[i][j] = 0.;
-                    model.csswm[p].vp[i][j] = 0.;
-                #endif
+                    #ifdef GravityWave
+                        model.csswm[p].hp[i][j] = Gravity(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]);
+                        model.csswm[p].up[i][j] = 0.;
+                        model.csswm[p].vp[i][j] = 0.;
+                    #endif
 
-                #ifdef SteadyGeostrophy
-                    model.csswm[p].hp[i][j] = SteadyGeostrophyH(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]);
-                    model.csswm[p].up[i][j] = (model.gLower[i][j][0] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][2]) * SteadyGeostrophyU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
-                                              (model.gLower[i][j][0] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][3]) * SteadyGeostrophyV(model.csswm[p].lon[i][j]);
-                    model.csswm[p].vp[i][j] = (model.gLower[i][j][2] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][2]) * SteadyGeostrophyU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
-                                              (model.gLower[i][j][2] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][3]) * SteadyGeostrophyV(model.csswm[p].lon[i][j]);
-                #endif
+                    #ifdef SteadyGeostrophy
+                        model.csswm[p].hp[i][j] = SteadyGeostrophyH(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]);
+                        model.csswm[p].up[i][j] = (model.gLower[i][j][0] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][2]) * SteadyGeostrophyU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
+                                                (model.gLower[i][j][0] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][3]) * SteadyGeostrophyV(model.csswm[p].lon[i][j]);
+                        model.csswm[p].vp[i][j] = (model.gLower[i][j][2] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][2]) * SteadyGeostrophyU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
+                                                (model.gLower[i][j][2] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][3]) * SteadyGeostrophyV(model.csswm[p].lon[i][j]);
+                    #endif
 
-                #ifdef Barotropic
-                    // model.csswm[p].hp[i][j] = BarotropicHPrime(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]);
-                    model.csswm[p].hp[i][j] = BarotropicH(model.csswm[p].lat[i][j]) + BarotropicHPrime(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]);
-                    model.csswm[p].up[i][j] = (model.gLower[i][j][0] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][2]) * BarotropicU(model.csswm[p].lat[i][j]) + 
-                                              (model.gLower[i][j][0] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][3]) * 0;
-                    model.csswm[p].vp[i][j] = (model.gLower[i][j][2] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][2]) * BarotropicU(model.csswm[p].lat[i][j]) + 
-                                              (model.gLower[i][j][2] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][3]) * 0;
-                #endif
+                    #ifdef Barotropic
+                        // model.csswm[p].hp[i][j] = BarotropicHPrime(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]);
+                        model.csswm[p].hp[i][j][k] = BarotropicH(model.csswm[p].lat[i][j]) + BarotropicHPrime(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]);
+                        model.csswm[p].up[i][j][k] = (model.gLower[i][j][0] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][2]) * BarotropicU(model.csswm[p].lat[i][j]) + 
+                                                     (model.gLower[i][j][0] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][3]) * 0;
+                        model.csswm[p].vp[i][j][k] = (model.gLower[i][j][2] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][2]) * BarotropicU(model.csswm[p].lat[i][j]) + 
+                                                     (model.gLower[i][j][2] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][3]) * 0;
+                    #endif
 
-                #ifdef Mountain
-                    model.csswm[p].hp[i][j] = MountainH(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]);
-                    model.csswm[p].up[i][j] = (model.gLower[i][j][0] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][2]) * MountainU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
-                                              (model.gLower[i][j][0] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][3]) * MountainV(model.csswm[p].lon[i][j]);
-                    model.csswm[p].vp[i][j] = (model.gLower[i][j][2] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][2]) * MountainU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
-                                              (model.gLower[i][j][2] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][3]) * MountainV(model.csswm[p].lon[i][j]); 
-                #endif
+                    #ifdef Mountain
+                        model.csswm[p].hp[i][j] = MountainH(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]);
+                        model.csswm[p].up[i][j] = (model.gLower[i][j][0] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][2]) * MountainU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
+                                                (model.gLower[i][j][0] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][3]) * MountainV(model.csswm[p].lon[i][j]);
+                        model.csswm[p].vp[i][j] = (model.gLower[i][j][2] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][2]) * MountainU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
+                                                (model.gLower[i][j][2] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][3]) * MountainV(model.csswm[p].lon[i][j]); 
+                    #endif
 
-                #ifdef RossbyHaurwitz
-                    model.csswm[p].hp[i][j] = RossbyHaurwitzH(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]);
-                    model.csswm[p].up[i][j] = (model.gLower[i][j][0] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][2]) * RossbyHaurwitzU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
-                                              (model.gLower[i][j][0] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][3]) * RossbyHaurwitzV(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]);
-                    model.csswm[p].vp[i][j] = (model.gLower[i][j][2] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][2]) * RossbyHaurwitzU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
-                                              (model.gLower[i][j][2] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][3]) * RossbyHaurwitzV(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]); 
-                #endif
+                    #ifdef RossbyHaurwitz
+                        model.csswm[p].hp[i][j] = RossbyHaurwitzH(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]);
+                        model.csswm[p].up[i][j] = (model.gLower[i][j][0] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][2]) * RossbyHaurwitzU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
+                                                (model.gLower[i][j][0] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][1] * model.csswm[p].IA[i][j][3]) * RossbyHaurwitzV(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]);
+                        model.csswm[p].vp[i][j] = (model.gLower[i][j][2] * model.csswm[p].IA[i][j][0] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][2]) * RossbyHaurwitzU(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]) + 
+                                                (model.gLower[i][j][2] * model.csswm[p].IA[i][j][1] + model.gLower[i][j][3] * model.csswm[p].IA[i][j][3]) * RossbyHaurwitzV(model.csswm[p].lon[i][j], model.csswm[p].lat[i][j]); 
+                    #endif
+                }
             }
         }
     }
@@ -93,13 +95,15 @@ void Init::Init2d(CSSWM & model) {
     for (int p = 0; p < 6; p++) {
         for (int i = 0; i < NX; i++) {
             for (int j = 0; j < NY; j++) {
-                model.csswm[p].hm[i][j] = model.csswm[p].hp[i][j]; 
-                model.csswm[p].um[i][j] = model.csswm[p].up[i][j]; 
-                model.csswm[p].vm[i][j] = model.csswm[p].vp[i][j];   
+                for (int k = 0; k < NZ; k++) {
+                    model.csswm[p].hm[i][j][k] = model.csswm[p].hp[i][j][k]; 
+                    model.csswm[p].um[i][j][k] = model.csswm[p].up[i][j][k]; 
+                    model.csswm[p].vm[i][j][k] = model.csswm[p].vp[i][j][k];   
 
-                model.csswm[p].h[i][j] = model.csswm[p].hp[i][j]; 
-                model.csswm[p].u[i][j] = model.csswm[p].up[i][j]; 
-                model.csswm[p].v[i][j] = model.csswm[p].vp[i][j];  
+                    model.csswm[p].h[i][j][k] = model.csswm[p].hp[i][j][k]; 
+                    model.csswm[p].u[i][j][k] = model.csswm[p].up[i][j][k]; 
+                    model.csswm[p].v[i][j][k] = model.csswm[p].vp[i][j][k];  
+                }
             }
         }
     }

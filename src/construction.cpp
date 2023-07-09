@@ -3,12 +3,12 @@
 CSSWM::patch::patch() {
     for (int i = 0; i < NX; i++) {
         for (int j = 0; j < NY; j++) {
-            hp[i][j] = h[i][j] = hm[i][j] = FILLVALUE;
-            up[i][j] = u[i][j] = um[i][j] = FILLVALUE;
-            vp[i][j] = v[i][j] = vm[i][j] = FILLVALUE;
-
+            for (int k = 0; k < NZ; k++) {
+                hp[i][j][k] = h[i][j][k] = hm[i][j][k] = FILLVALUE;
+                up[i][j][k] = u[i][j][k] = um[i][j][k] = FILLVALUE;
+                vp[i][j][k] = v[i][j][k] = vm[i][j][k] = FILLVALUE;
+            }
             lon[i][j] = lat[i][j] = FILLVALUE;
-
             x[i][j] = y[i][j] = FILLVALUE;
         }
     }

@@ -43,10 +43,12 @@ void Outputs::h(int n, CSSWM &model) {
     fstream fouth;
     string hname = OUTPUTPATH + (string) "h/h_" + std::to_string(n) + ".txt";
     fouth.open(hname, std::ios::out);
-    for (int p = 0; p < 6; p++) {
-        for (int j = 1; j < NY-1; j++) {
-            for (int i = 1; i < NX-1; i++) {
-                fouth << model.csswm[p].h[i][j] << " ";
+    for (int k = 0; k < NZ; k++) {
+        for (int p = 0; p < 6; p++) {
+            for (int j = 1; j < NY-1; j++) {
+                for (int i = 1; i < NX-1; i++) {
+                    fouth << model.csswm[p].h[i][j][k] << " ";
+                }
             }
         }
     }
@@ -61,11 +63,13 @@ void Outputs::u(int n, CSSWM &model) {
     fstream foutu_lon_lat;
     string u_lon_latname = "../outputs/u_lon_lat/u_lon_lat_" + std::to_string(n) + ".txt";
     foutu_lon_lat.open(u_lon_latname, std::ios::out);
-    for (int p = 0; p < 6; p++) {
-        for (int j = 1; j < NY-1; j++) {
-            for (int i = 1; i < NX-1; i++) {
-                foutu << model.csswm[p].u[i][j] << " ";
-                foutu_lon_lat << model.Cube2Sphere_U(model, p, i, j) << " ";
+    for (int k = 0; k < NZ; k++) {
+        for (int p = 0; p < 6; p++) {
+            for (int j = 1; j < NY-1; j++) {
+                for (int i = 1; i < NX-1; i++) {
+                    foutu << model.csswm[p].u[i][j][k] << " ";
+                    foutu_lon_lat << model.Cube2Sphere_U(model, p, i, j, k) << " ";
+                }
             }
         }
     }
@@ -80,11 +84,13 @@ void Outputs::v(int n, CSSWM &model) {
     fstream foutv_lon_lat;
     string v_lon_latname = "../outputs/v_lon_lat/v_lon_lat_" + std::to_string(n) + ".txt";
     foutv_lon_lat.open(v_lon_latname, std::ios::out);
-    for (int p = 0; p < 6; p++) {
-        for (int j = 1; j < NY-1; j++) {
-            for (int i = 1; i < NX-1; i++) {
-                foutv << model.csswm[p].v[i][j] << " ";
-                foutv_lon_lat << model.Cube2Sphere_V(model, p, i, j) << " ";
+    for (int k = 0; k < NZ; k++) {
+        for (int p = 0; p < 6; p++) {
+            for (int j = 1; j < NY-1; j++) {
+                for (int i = 1; i < NX-1; i++) {
+                    foutv << model.csswm[p].v[i][j][k] << " ";
+                    foutv_lon_lat << model.Cube2Sphere_V(model, p, i, j, k) << " ";
+                }
             }
         }
     }
@@ -158,30 +164,35 @@ void Outputs::huv_nc(int n, CSSWM &model) {
     NcDim p = dataFile.addDim("p", 6);
     NcDim xDim = dataFile.addDim("x", NX);
     NcDim yDim = dataFile.addDim("y", NY);
+    NcDim zDim = dataFile.addDim("z", NZ);
     NcDim lonDim = dataFile.addDim("lon", NX);
     NcDim latDim = dataFile.addDim("lat", NY);
 
-    vector<NcDim> xyDim, lonlatDim;
-    xyDim.push_back(p);
-    xyDim.push_back(xDim);
-    xyDim.push_back(yDim);
+    vector<NcDim> xyzDim, lonlatzDim;
+    xyzDim.push_back(p);
+    xyzDim.push_back(xDim);
+    xyzDim.push_back(yDim);
+    xyzDim.push_back(zDim);
 
-    lonlatDim.push_back(p);
-    lonlatDim.push_back(lonDim);
-    lonlatDim.push_back(latDim);
+    lonlatzDim.push_back(p);
+    lonlatzDim.push_back(lonDim);
+    lonlatzDim.push_back(latDim);
+    lonlatzDim.push_back(zDim);
 
-    NcVar h = dataFile.addVar("h", ncDouble, xyDim);
-    NcVar u = dataFile.addVar("u", ncDouble, xyDim);
-    NcVar v = dataFile.addVar("v", ncDouble, xyDim);
+    NcVar h = dataFile.addVar("h", ncDouble, xyzDim);
+    NcVar u = dataFile.addVar("u", ncDouble, xyzDim);
+    NcVar v = dataFile.addVar("v", ncDouble, xyzDim);
 
-    NcVar ulonlat = dataFile.addVar("u_lonlat", ncDouble, lonlatDim);
-    NcVar vlonlat = dataFile.addVar("v_lonlat", ncDouble, lonlatDim);
-    double u_lon_lat[6][NX][NY], v_lon_lat[6][NX][NY];
-    for (int p = 0; p < 6; p++) {
-        for (int j = 0; j < NY; j++) {
-            for (int i = 0; i < NX; i++) {
-                u_lon_lat[p][i][j] = model.Cube2Sphere_U(model, p, i, j);
-                v_lon_lat[p][i][j] = model.Cube2Sphere_V(model, p, i, j);
+    NcVar ulonlatz = dataFile.addVar("u_lonlat", ncDouble, lonlatzDim);
+    NcVar vlonlatz = dataFile.addVar("v_lonlat", ncDouble, lonlatzDim);
+    double u_lon_lat[6][NX][NY][NZ], v_lon_lat[6][NX][NY][NZ];
+    for (int k = 0; k < NZ; k++) {
+        for (int p = 0; p < 6; p++) {
+            for (int j = 0; j < NY; j++) {
+                for (int i = 0; i < NX; i++) {
+                    u_lon_lat[p][i][j][k] = model.Cube2Sphere_U(model, p, i, j, k);
+                    v_lon_lat[p][i][j][k] = model.Cube2Sphere_V(model, p, i, j, k);
+                }
             }
         }
     }
@@ -190,9 +201,11 @@ void Outputs::huv_nc(int n, CSSWM &model) {
     startp.push_back(0);
     startp.push_back(0);
     startp.push_back(0);
+    startp.push_back(0);
     countp.push_back(1);
     countp.push_back(NX);
     countp.push_back(NY);
+    countp.push_back(NZ);
 
     for (int p = 0; p < 6; p++) {
         startp[0] = p;
@@ -200,8 +213,8 @@ void Outputs::huv_nc(int n, CSSWM &model) {
         u.putVar(startp, countp, model.csswm[p].u);
         v.putVar(startp, countp, model.csswm[p].v);
 
-        ulonlat.putVar(startp, countp, u_lon_lat[p]);
-        vlonlat.putVar(startp, countp, v_lon_lat[p]);
+        ulonlatz.putVar(startp, countp, u_lon_lat[p]);
+        vlonlatz.putVar(startp, countp, v_lon_lat[p]);
     }
 }
 

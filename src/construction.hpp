@@ -10,9 +10,9 @@ public:
         // constructer
         patch();
 
-        double hp[NX][NY], h[NX][NY], hm[NX][NY];
-        double up[NX][NY], u[NX][NY], um[NX][NY];
-        double vp[NX][NY], v[NX][NY], vm[NX][NY];
+        double hp[NX][NY][NZ], h[NX][NY][NZ], hm[NX][NY][NZ];
+        double up[NX][NY][NZ], u[NX][NY][NZ], um[NX][NY][NZ];
+        double vp[NX][NY][NZ], v[NX][NY][NZ], vm[NX][NY][NZ];
 
         #ifdef Mountain
             double hs[NX][NY];
@@ -58,14 +58,14 @@ public:
 
     // ***********************************************************************************
     // In transform.cpp
-    double Cube2Sphere_U(CSSWM &, int, int, int);
-    double Cube2Sphere_V(CSSWM &, int, int, int);
-    double Sphere2Cube_U(CSSWM &, int, int, int);
-    double Sphere2Cube_V(CSSWM &, int, int, int);
-    double Cube2Cube_U(CSSWM &model, int p1, int p2, int i1, int j1, int i2, int j2);
-    double Cube2Cube_V(CSSWM &model, int p1, int p2, int i1, int j1, int i2, int j2);
-    double Cube2Cube_BV2AU(CSSWM &model, int p1, int p2, int i1, int j1, int i2, int j2);
-    double Cube2Cube_BU2AV(CSSWM &model, int p1, int p2, int i1, int j1, int i2, int j2);
+    double Cube2Sphere_U(CSSWM &model, int p, int i, int j, int k);
+    double Cube2Sphere_V(CSSWM &model, int p, int i, int j, int k);
+    double Sphere2Cube_U(CSSWM &model, int p, int i, int j, int k);
+    double Sphere2Cube_V(CSSWM &model, int p, int i, int j, int k);
+    double Cube2Cube_U(CSSWM &model, int p1, int p2, int i1, int j1, int i2, int j2, int k);
+    double Cube2Cube_V(CSSWM &model, int p1, int p2, int i1, int j1, int i2, int j2, int k);
+    double Cube2Cube_BV2AU(CSSWM &model, int p1, int p2, int i1, int j1, int i2, int j2, int k);
+    double Cube2Cube_BU2AV(CSSWM &model, int p1, int p2, int i1, int j1, int i2, int j2, int k);
     double Cube2Cube_U_2(double gLower[4], double IA[4], double A[4], double gUpper[4], double u, double v);
     double Cube2Cube_V_2(double gLower[4], double IA[4], double A[4], double gUpper[4], double u, double v);
     void matrixMul(double firstMatrix[4], double secondMatrix[4], double mult[2][2]);

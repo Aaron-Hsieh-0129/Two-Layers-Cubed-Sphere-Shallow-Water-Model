@@ -24,31 +24,31 @@ void CSSWM::matrixMul(double firstMatrix[4], double secondMatrix[4], double mult
 	}
 }
 
-double CSSWM::Cube2Sphere_U(CSSWM &model, int p, int i, int j) {
+double CSSWM::Cube2Sphere_U(CSSWM &model, int p, int i, int j, int k) {
     double mult[2][2];
     model.matrixMul(model.gUpper[i][j], model.csswm[p].A[i][j], mult);
-    return mult[0][0] * model.csswm[p].u[i][j] + mult[0][1] * model.csswm[p].v[i][j];
+    return mult[0][0] * model.csswm[p].u[i][j][k] + mult[0][1] * model.csswm[p].v[i][j][k];
 }
 
-double CSSWM::Cube2Sphere_V(CSSWM &model, int p, int i, int j) {
+double CSSWM::Cube2Sphere_V(CSSWM &model, int p, int i, int j, int k) {
     double mult[2][2];
     matrixMul(model.csswm[p].A[i][j], model.gUpper[i][j], mult);
-    return mult[1][0] * model.csswm[p].u[i][j] + mult[1][1] * model.csswm[p].v[i][j];
+    return mult[1][0] * model.csswm[p].u[i][j][k] + mult[1][1] * model.csswm[p].v[i][j][k];
 }
 
-double CSSWM::Sphere2Cube_U(CSSWM &model, int p, int i, int j) {
+double CSSWM::Sphere2Cube_U(CSSWM &model, int p, int i, int j, int k) {
     double mult[2][2];
     matrixMul(model.gLower[i][j], model.csswm[p].IA[i][j], mult);
-    return mult[0][0] * model.csswm[p].u[i][j] + mult[0][1] * model.csswm[p].v[i][j];
+    return mult[0][0] * model.csswm[p].u[i][j][k] + mult[0][1] * model.csswm[p].v[i][j][k];
 }
 
-double CSSWM::Sphere2Cube_V(CSSWM &model, int p, int i, int j) {
+double CSSWM::Sphere2Cube_V(CSSWM &model, int p, int i, int j, int k) {
     double mult[2][2];
     matrixMul(model.gLower[i][j], model.csswm[p].IA[i][j], mult);
-    return mult[1][0] * model.csswm[p].u[i][j] + mult[1][1] * model.csswm[p].v[i][j];
+    return mult[1][0] * model.csswm[p].u[i][j][k] + mult[1][1] * model.csswm[p].v[i][j][k];
 }
 
-double CSSWM::Cube2Cube_U(CSSWM &model, int p1, int p2, int i1, int j1, int i2, int j2) {
+double CSSWM::Cube2Cube_U(CSSWM &model, int p1, int p2, int i1, int j1, int i2, int j2, int k) {
     // p1 is other patch and p2 is the patch who needs other's information
     double mult[2][2], A[2][2], B[2][2];
     // init
@@ -72,10 +72,10 @@ double CSSWM::Cube2Cube_U(CSSWM &model, int p1, int p2, int i1, int j1, int i2, 
 		}
 	}
     
-    return mult[0][0] * model.csswm[p2].up[i2][j2] + mult[0][1] * model.csswm[p2].vp[i2][j2];
+    return mult[0][0] * model.csswm[p2].up[i2][j2][k] + mult[0][1] * model.csswm[p2].vp[i2][j2][k];
 }
 
-double CSSWM::Cube2Cube_V(CSSWM &model, int p1, int p2, int i1, int j1, int i2, int j2) {
+double CSSWM::Cube2Cube_V(CSSWM &model, int p1, int p2, int i1, int j1, int i2, int j2, int k) {
     // p1 is other patch and p2 is the patch who needs other's information
     double mult[2][2], A[2][2], B[2][2];
     // init
@@ -99,10 +99,10 @@ double CSSWM::Cube2Cube_V(CSSWM &model, int p1, int p2, int i1, int j1, int i2, 
 		}
 	}
 
-    return mult[1][0] * model.csswm[p2].up[i2][j2] + mult[1][1] * model.csswm[p2].vp[i2][j2];
+    return mult[1][0] * model.csswm[p2].up[i2][j2][k] + mult[1][1] * model.csswm[p2].vp[i2][j2][k];
 }
 
-double CSSWM::Cube2Cube_BV2AU(CSSWM &model, int p1, int p2, int i1, int j1, int i2, int j2) {
+double CSSWM::Cube2Cube_BV2AU(CSSWM &model, int p1, int p2, int i1, int j1, int i2, int j2, int k) {
     // p1 is other patch and p2 is the patch who needs other's information
     double mult[2][2], A[2][2], B[2][2];
     // init
@@ -126,10 +126,10 @@ double CSSWM::Cube2Cube_BV2AU(CSSWM &model, int p1, int p2, int i1, int j1, int 
 		}
 	}
 
-    return mult[0][0] * model.csswm[p2].up[i2][j2] + mult[0][1] * model.csswm[p2].vp[i2][j2];
+    return mult[0][0] * model.csswm[p2].up[i2][j2][k] + mult[0][1] * model.csswm[p2].vp[i2][j2][k];
 }
 
-double CSSWM::Cube2Cube_BU2AV(CSSWM &model, int p1, int p2, int i1, int j1, int i2, int j2) {
+double CSSWM::Cube2Cube_BU2AV(CSSWM &model, int p1, int p2, int i1, int j1, int i2, int j2, int k) {
     // p1 is other patch and p2 is the patch who needs other's information
     double mult[2][2], A[2][2], B[2][2];
     // init
@@ -159,7 +159,7 @@ double CSSWM::Cube2Cube_BU2AV(CSSWM &model, int p1, int p2, int i1, int j1, int 
     // std::cout << "u: " << mult[0][0] * model.csswm[p2].up[i2][j2] + mult[0][1] * model.csswm[p2].vp[i2][j2] << std::endl;
     // std::cout << "v: " << mult[1][0] * model.csswm[p2].up[i2][j2] + mult[1][1] * model.csswm[p2].vp[i2][j2] << std::endl;
 
-    return mult[1][0] * model.csswm[p2].up[i2][j2] + mult[1][1] * model.csswm[p2].vp[i2][j2];
+    return mult[1][0] * model.csswm[p2].up[i2][j2][k] + mult[1][1] * model.csswm[p2].vp[i2][j2][k];
 }
 
 double CSSWM::Cube2Cube_U_2(double gLower[4], double IA[4], double A[4], double gUpper[4], double u, double v) {

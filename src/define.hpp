@@ -24,6 +24,7 @@
 #elif defined(FourthOrderSpace) 
     #define NX ((int) (90/DX + 4))
     #define NY ((int) (90/DY + 4))
+    #define NZ (2)
 #endif
 
 #define D2T (2. * DT)
