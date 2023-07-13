@@ -150,10 +150,10 @@ void Iteration::ph_pt_4(CSSWM &model) {
         double psqrtGHU_px = 0, psqrtGHU_py = 0, dx_for_h = 0, dy_for_h = 0;
         for (int i = 2; i < NX-2; i++) {
             for (int j = 2; j < NY-2; j++) {
+                dx_for_h = 0.5 * (model.csswm[p].x[i+1][j] - model.csswm[p].x[i-1][j]);
+                dy_for_h = 0.5 * (model.csswm[p].y[i][j+1] - model.csswm[p].y[i][j-1]);
+                
                 for (int k = 0; k < NZ; k++) {
-                    dx_for_h = 0.5 * (model.csswm[p].x[i+1][j] - model.csswm[p].x[i-1][j]);
-                    dy_for_h = 0.5 * (model.csswm[p].y[i][j+1] - model.csswm[p].y[i][j-1]);
-
                     psqrtGHU_px = (1. / (model.sqrtG[i][j] * 12. * dx_for_h)) * 
                                   (-1.*(model.sqrtG[i+2][j] * model.csswm[p].h[i+2][j][k] * (model.gUpper[i+2][j][0] * model.csswm[p].u[i+2][j][k] + model.gUpper[i+2][j][1] * model.csswm[p].v[i+2][j][k]))
                                    +8.*(model.sqrtG[i+1][j] * model.csswm[p].h[i+1][j][k] * (model.gUpper[i+1][j][0] * model.csswm[p].u[i+1][j][k] + model.gUpper[i+1][j][1] * model.csswm[p].v[i+1][j][k]))
@@ -168,9 +168,15 @@ void Iteration::ph_pt_4(CSSWM &model) {
                 
                     model.csswm[p].hp[i][j][k] = model.csswm[p].hm[i][j][k] + D2T * (-psqrtGHU_px - psqrtGHU_py);
                     
-                    #ifdef DIFFUSION
+                    #if defined(DIFFUSION)
                         model.csswm[p].hp[i][j][k] += D2T * KX * (model.csswm[p].hm[i+1][j][k] - 2. * model.csswm[p].hm[i][j][k] + model.csswm[p].hm[i-1][j][k]) / pow(dx_for_h, 2) + 
                                                       D2T * KY * (model.csswm[p].hm[i][j+1][k] - 2. * model.csswm[p].hm[i][j][k] + model.csswm[p].hm[i][j-1][k]) / pow(dy_for_h, 2);
+                    #elif defined(DIFFUSION4)
+                        model.csswm[p].hp[i][j][k] += D2T * KX * (-model.csswm[p].hm[i+2][j][k] + 16.*model.csswm[p].hm[i+1][j][k] - 30.*model.csswm[p].hm[i][j][k] + 16.*model.csswm[p].hm[i-1][j][k] - model.csswm[p].hm[i-2][j][k]) / (12.*pow(dx_for_h, 2)) + 
+                                                      D2T * KY * (-model.csswm[p].hm[i][j+2][k] + 16.*model.csswm[p].hm[i][j+1][k] - 30.*model.csswm[p].hm[i][j][k] + 16.*model.csswm[p].hm[i][j-1][k] - model.csswm[p].hm[i][j-2][k]) / (12.*pow(dy_for_h, 2));
+                    #elif defined(DIFFUSIONLARS)
+                        model.csswm[p].hp[i][j][k] += D2T * KX * (model.csswm[p].h[i+1][j][k] - model.csswm[p].hp[i][j][k] - model.csswm[p].hm[i][j][k] + model.csswm[p].h[i-1][j][k]) / pow(dx_for_h, 2) + 
+                                                      D2T * KY * (model.csswm[p].h[i][j+1][k] - model.csswm[p].hp[i][j][k] - model.csswm[p].hm[i][j][k] + model.csswm[p].h[i][j-1][k]) / pow(dy_for_h, 2);
                     #endif
                 }
             }
@@ -186,23 +192,45 @@ void Iteration::pu_pt_4(CSSWM &model) {
     #ifdef Mountain
         double pgHs_px = 0.;
     #endif
+    double pgH_px_all = 0;
 
     for (int p = 0; p < 6; p++) {
         for (int i = 2; i < NX-2; i++) {
             for (int j = 2; j < NY-2; j++) {
-                for (int k = 0; k < NZ; k++) {
-                    dx_for_u = 0.5 * (model.csswm[p].x[i+1][j] - model.csswm[p].x[i-1][j]);
-                    dy_for_u = 0.5 * (model.csswm[p].y[i][j+1] - model.csswm[p].y[i][j-1]);
+                dx_for_u = 0.5 * (model.csswm[p].x[i+1][j] - model.csswm[p].x[i-1][j]);
+                dy_for_u = 0.5 * (model.csswm[p].y[i][j+1] - model.csswm[p].y[i][j-1]);
 
-                    #if defined(SteadyGeostrophy) || defined(Mountain)
-                        f = 2 * OMEGA * (-cos(model.csswm[p].lon[i][j]) * cos(model.csswm[p].lat[i][j]) * sin(ALPHA0) + sin(model.csswm[p].lat[i][j]) * cos(ALPHA0));
-                    #elif defined(Barotropic) || defined(RossbyHaurwitz)
-                        f = 2 * OMEGA * sin(model.csswm[p].lat[i][j]);
-                    #else
-                        f = 0;
-                    #endif
-                    
-                    pgH_px = GRAVITY / (12.*dx_for_u) * (-1*model.csswm[p].h[i+2][j][k] + 8*model.csswm[p].h[i+1][j][k] - 8*model.csswm[p].h[i-1][j][k] + 1*model.csswm[p].h[i-2][j][k]);
+                #if defined(SteadyGeostrophy) || defined(Mountain)
+                    f = 2 * OMEGA * (-cos(model.csswm[p].lon[i][j]) * cos(model.csswm[p].lat[i][j]) * sin(ALPHA0) + sin(model.csswm[p].lat[i][j]) * cos(ALPHA0));
+                #elif defined(Barotropic) || defined(RossbyHaurwitz)
+                    f = 2 * OMEGA * sin(model.csswm[p].lat[i][j]);
+                #else
+                    f = 0;
+                #endif
+                pgH_px_all = 0;
+
+                for (int k = 0; k < NZ; k++) {
+                    pgH_px_all += GRAVITY / (12.*dx_for_u) * (-1*model.csswm[p].h[i+2][j][k] + 8*model.csswm[p].h[i+1][j][k] - 8*model.csswm[p].h[i-1][j][k] + 1*model.csswm[p].h[i-2][j][k]);
+                }
+                #if defined (Mountain)
+                    pgH_px_all += GRAVITY / (12.*dx_for_u) * (-1.*model.csswm[p].hs[i+2][j] + 8.*model.csswm[p].hs[i+1][j] - 8.*model.csswm[p].hs[i-1][j] + 1.*model.csswm[p].hs[i-2][j]);
+                #endif
+
+                for (int k = 0; k < NZ; k++) {
+                    if (k == 0) {
+                        #if defined (Mountain)
+                            pgH_px = RHO2 / RHO1 * 
+                                     (pgH_px_all + (GRAVITY * (RHO1-RHO2)/RHO2) / (12.*dx_for_u) * (-1.*model.csswm[p].h[i+2][j][1] + 8.*model.csswm[p].h[i+1][j][1] - 8.*model.csswm[p].h[i-1][j][1] + 1.*model.csswm[p].h[i-2][j][1] + 
+                                                                                                    -1.*model.csswm[p].hs[i+2][j] + 8.*model.csswm[p].hs[i+1][j] - 8.*model.csswm[p].hs[i-1][j] + 1.*model.csswm[p].hs[i-2][j]));
+                        #else
+                            pgH_px = RHO2 / RHO1 * 
+                                     (pgH_px_all + (GRAVITY * (RHO1-RHO2)/RHO2) / (12.*dx_for_u) * (-1.*model.csswm[p].h[i+2][j][1] + 8.*model.csswm[p].h[i+1][j][1] - 8.*model.csswm[p].h[i-1][j][1] + 1.*model.csswm[p].h[i-2][j][1]));
+                        #endif
+                        
+                    }
+                    else if (k == 1) {
+                        pgH_px = pgH_px_all;
+                    }
 
                     pU2_px = 0.5 / (12.*dx_for_u) * 
                             (-1.*(model.gUpper[i+2][j][0] * pow(model.csswm[p].u[i+2][j][k], 2))
@@ -227,16 +255,17 @@ void Iteration::pu_pt_4(CSSWM &model) {
                                     * (model.gUpper[i][j][2] * model.csswm[p].u[i][j][k] + model.gUpper[i][j][3] * model.csswm[p].v[i][j][k]);
                 
 
-                    #ifdef Mountain
-                        pgHs_px = GRAVITY / (12.*dx_for_u) * (-1.*model.csswm[p].hs[i+2][j] + 8.*model.csswm[p].hs[i+1][j] - 8.*model.csswm[p].hs[i-1][j] + 1.*model.csswm[p].hs[i-2][j]);
-                        model.csswm[p].up[i][j] = model.csswm[p].um[i][j] + D2T * (-pgH_px - pgHs_px - pU2_px - pUV_px - pV2_px + rotationU);
-                    #else
-                        model.csswm[p].up[i][j][k] = model.csswm[p].um[i][j][k] + D2T * (-pgH_px - pU2_px - pUV_px - pV2_px + rotationU);
-                    #endif
+                    model.csswm[p].up[i][j][k] = model.csswm[p].um[i][j][k] + D2T * (-pgH_px - pU2_px - pUV_px - pV2_px + rotationU);
 
-                    #ifdef DIFFUSION
+                    #if defined(DIFFUSION)
                         model.csswm[p].up[i][j][k] += D2T * KX * (model.csswm[p].um[i+1][j][k] - 2. * model.csswm[p].um[i][j][k] + model.csswm[p].um[i-1][j][k]) / pow(dx_for_u, 2) + 
                                                       D2T * KY * (model.csswm[p].um[i][j+1][k] - 2. * model.csswm[p].um[i][j][k] + model.csswm[p].um[i][j-1][k]) / pow(dy_for_u, 2);
+                    #elif defined(DIFFUSION4)
+                        model.csswm[p].up[i][j][k] += D2T * KX * (-model.csswm[p].um[i+2][j][k] + 16.*model.csswm[p].um[i+1][j][k] - 30.*model.csswm[p].um[i][j][k] + 16.*model.csswm[p].um[i-1][j][k] - model.csswm[p].um[i-2][j][k]) / (12.*pow(dx_for_u, 2)) + 
+                                                      D2T * KY * (-model.csswm[p].um[i][j+2][k] + 16.*model.csswm[p].um[i][j+1][k] - 30.*model.csswm[p].um[i][j][k] + 16.*model.csswm[p].um[i][j-1][k] - model.csswm[p].um[i][j-2][k]) / (12.*pow(dy_for_u, 2));
+                    #elif defined(DIFFUSIONLARS)
+                        model.csswm[p].up[i][j][k] += D2T * KX * (model.csswm[p].u[i+1][j][k] - model.csswm[p].up[i][j][k] - model.csswm[p].um[i][j][k] + model.csswm[p].u[i-1][j][k]) / pow(dx_for_u, 2) + 
+                                                      D2T * KY * (model.csswm[p].u[i][j+1][k] - model.csswm[p].up[i][j][k] - model.csswm[p].um[i][j][k] + model.csswm[p].u[i][j-1][k]) / pow(dy_for_u, 2);
                     #endif
                 }
             }
@@ -252,23 +281,45 @@ void Iteration::pv_pt_4(CSSWM &model) {
     #ifdef Mountain
         double pgHs_py = 0.;
     #endif
+    double pgH_py_all = 0;
 
     for (int p = 0; p < 6; p++) {
         for (int i = 2; i < NX-2; i++) {
             for (int j = 2; j < NY-2; j++) {
+                dx_for_v = 0.5 * (model.csswm[p].x[i+1][j] - model.csswm[p].x[i-1][j]);
+                dy_for_v = 0.5 * (model.csswm[p].y[i][j+1] - model.csswm[p].y[i][j-1]);
+
+                #if defined(SteadyGeostrophy) || defined(Mountain)
+                    f = 2 * OMEGA * (-cos(model.csswm[p].lon[i][j]) * cos(model.csswm[p].lat[i][j]) * sin(ALPHA0) + sin(model.csswm[p].lat[i][j]) * cos(ALPHA0));
+                #elif defined(Barotropic) || defined(RossbyHaurwitz)
+                    f = 2 * OMEGA * sin(model.csswm[p].lat[i][j]);
+                #else
+                    f = 0;
+                #endif
+                pgH_py_all = 0;
+
                 for (int k = 0; k < NZ; k++) {
-                    dx_for_v = 0.5 * (model.csswm[p].x[i+1][j] - model.csswm[p].x[i-1][j]);
-                    dy_for_v = 0.5 * (model.csswm[p].y[i][j+1] - model.csswm[p].y[i][j-1]);
+                    pgH_py_all += GRAVITY / (12.*dy_for_v) * (-1.*model.csswm[p].h[i][j+2][k] + 8.*model.csswm[p].h[i][j+1][k] - 8.*model.csswm[p].h[i][j-1][k] + 1.*model.csswm[p].h[i][j-2][k]);
+                }
+                #if defined (Mountain)
+                    pgH_py_all += GRAVITY / (12.*dy_for_v) * (-1.*model.csswm[p].hs[i][j+2] + 8.*model.csswm[p].hs[i][j+1] - 8.*model.csswm[p].hs[i][j-1] + 1.*model.csswm[p].hs[i][j-2]);
+                #endif
 
-                    #if defined(SteadyGeostrophy) || defined(Mountain)
-                        f = 2 * OMEGA * (-cos(model.csswm[p].lon[i][j]) * cos(model.csswm[p].lat[i][j]) * sin(ALPHA0) + sin(model.csswm[p].lat[i][j]) * cos(ALPHA0));
-                    #elif defined(Barotropic) || defined(RossbyHaurwitz)
-                        f = 2 * OMEGA * sin(model.csswm[p].lat[i][j]);
-                    #else
-                        f = 0;
-                    #endif
-
-                    pgH_py = GRAVITY / (12.*dy_for_v) * (-1.*model.csswm[p].h[i][j+2][k] + 8.*model.csswm[p].h[i][j+1][k] - 8.*model.csswm[p].h[i][j-1][k] + 1.*model.csswm[p].h[i][j-2][k]);
+                for (int k = 0; k < NZ; k++) {
+                    if (k == 0) {
+                        #if defined (Mountain)
+                            pgH_py = RHO2 / RHO1 * 
+                                     (pgH_py_all + (GRAVITY * (RHO1-RHO2)/RHO2) / (12.*dy_for_v) * (-1.*model.csswm[p].h[i][j+2][1] + 8.*model.csswm[p].h[i][j+1][1] - 8.*model.csswm[p].h[i][j-1][1] + 1.*model.csswm[p].h[i][j-2][1] + 
+                                                                                                    -1.*model.csswm[p].hs[i][j+2] + 8.*model.csswm[p].hs[i][j+1] - 8.*model.csswm[p].hs[i][j-1] + 1.*model.csswm[p].hs[i][j-2]));
+                        #else
+                            pgH_py = RHO2 / RHO1 * 
+                                     (pgH_py_all + (GRAVITY * (RHO1-RHO2)/RHO2) / (12.*dy_for_v) * (-1.*model.csswm[p].h[i][j+2][1] + 8.*model.csswm[p].h[i][j+1][1] - 8.*model.csswm[p].h[i][j-1][1] + 1.*model.csswm[p].h[i][j-2][1]));
+                        #endif
+                        
+                    }
+                    else if (k == 1) {
+                        pgH_py = pgH_py_all;
+                    }
 
                     pU2_py = 0.5 /(12.*dy_for_v) * 
                             (-1.*(model.gUpper[i][j+2][0] * pow(model.csswm[p].u[i][j+2][k], 2))
@@ -292,17 +343,17 @@ void Iteration::pv_pt_4(CSSWM &model) {
                                  ((-1.*model.csswm[p].u[i][j+2][k] + 8.*model.csswm[p].u[i][j+1][k] - 8.*model.csswm[p].u[i][j-1][k] + 1.*model.csswm[p].u[i][j-2][k]) / (12.*dy_for_v)) + model.sqrtG[i][j] * f) 
                                     * (model.gUpper[i][j][0] * model.csswm[p].u[i][j][k] + model.gUpper[i][j][1] * model.csswm[p].v[i][j][k]);
 
-                    
-                    #ifdef Mountain
-                        pgHs_py = GRAVITY / (12.*dy_for_v) * (-1.*model.csswm[p].hs[i][j+2] + 8.*model.csswm[p].hs[i][j+1] - 8.*model.csswm[p].hs[i][j-1] + 1.*model.csswm[p].hs[i][j-2]);
-                        model.csswm[p].vp[i][j] = model.csswm[p].vm[i][j] + D2T * (-pgH_py - pgHs_py - pU2_py - pUV_py - pV2_py - rotationV);
-                    #else
-                        model.csswm[p].vp[i][j][k] = model.csswm[p].vm[i][j][k] + D2T * (-pgH_py - pU2_py - pUV_py - pV2_py - rotationV);
-                    #endif
+                    model.csswm[p].vp[i][j][k] = model.csswm[p].vm[i][j][k] + D2T * (-pgH_py - pU2_py - pUV_py - pV2_py - rotationV);
 
-                    #ifdef DIFFUSION
+                    #if defined(DIFFUSION)
                         model.csswm[p].vp[i][j][k] += D2T * KX * (model.csswm[p].vm[i+1][j][k] - 2. * model.csswm[p].vm[i][j][k] + model.csswm[p].vm[i-1][j][k]) / pow(dx_for_v, 2) + 
                                                       D2T * KY * (model.csswm[p].vm[i][j+1][k] - 2. * model.csswm[p].vm[i][j][k] + model.csswm[p].vm[i][j-1][k]) / pow(dy_for_v, 2);
+                    #elif defined(DIFFUSION4)
+                        model.csswm[p].vp[i][j][k] += D2T * KX * (-model.csswm[p].vm[i+2][j][k] + 16.*model.csswm[p].vm[i+1][j][k] - 30.*model.csswm[p].vm[i][j][k] + 16.*model.csswm[p].vm[i-1][j][k] - model.csswm[p].vm[i-2][j][k]) / (12.*pow(dx_for_v, 2)) + 
+                                                      D2T * KY * (-model.csswm[p].vm[i][j+2][k] + 16.*model.csswm[p].vm[i][j+1][k] - 30.*model.csswm[p].vm[i][j][k] + 16.*model.csswm[p].vm[i][j-1][k] - model.csswm[p].vm[i][j-2][k]) / (12.*pow(dy_for_v, 2));
+                    #elif defined(DIFFUSIONLARS)
+                        model.csswm[p].vp[i][j][k] += D2T * KX * (model.csswm[p].v[i+1][j][k] - model.csswm[p].vp[i][j][k] - model.csswm[p].vm[i][j][k] + model.csswm[p].v[i-1][j][k]) / pow(dx_for_v, 2) + 
+                                                      D2T * KY * (model.csswm[p].v[i][j+1][k] - model.csswm[p].vp[i][j][k] - model.csswm[p].vm[i][j][k] + model.csswm[p].v[i][j-1][k]) / pow(dy_for_v, 2);
                     #endif
                 }
             }

@@ -25,6 +25,8 @@
     #define NX ((int) (90/DX + 4))
     #define NY ((int) (90/DY + 4))
     #define NZ (2)
+    #define RHO1 (1.3)
+    #define RHO2 (0.7)
 #endif
 
 #define D2T (2. * DT)
@@ -32,17 +34,19 @@
 // Jung
 #define ALPHA0 (0)
 // #define Advection
-// #define GravityWave
+#define GravityWave
 // #define SteadyGeostrophy
-#define Barotropic
+// #define Barotropic
 // #define Mountain
 // #define RossbyHaurwitz
 
 // #define TrueSol
 #define DIFFUSION
+// #define DIFFUSION4
+// #define DIFFUSIONLARS
 #define TIMEFILTER
-#define KX (200000.)
-#define KY (200000.)
+#define KX (5000000.)
+#define KY (5000000.)
 #define TIMETS (0.06)
 
 #endif
